@@ -274,6 +274,12 @@ void set_sampling_request(SamplingRequest* req, PyObject* src_ids) {
   req->Set(reinterpret_cast<int64_t*>(PyArray_DATA(srcs)), batch_size);
 }
 
+void set_sampling_request_prev(SamplingRequest* req, PyObject* prev_ids) {
+  PyArrayObject* prevs = reinterpret_cast<PyArrayObject*>(prev_ids);
+  npy_intp batch_size = PyArray_Size(prev_ids);
+  req->SetPrev(reinterpret_cast<int64_t*>(PyArray_DATA(prevs)), batch_size);
+}
+
 PyObject* get_sampling_node_ids(SamplingResponse* res) {
   int32_t size = res->TotalNeighborCount();
   npy_intp shape[1];
@@ -283,6 +289,18 @@ PyObject* get_sampling_node_ids(SamplingResponse* res) {
   PyArrayObject* np_array = reinterpret_cast<PyArrayObject*>(obj);
   memcpy(reinterpret_cast<int64_t*>(PyArray_DATA(np_array)),
          res->GetNeighborIds(), size * INT64_BYTES);
+  return obj;
+}
+
+PyObject* get_sampling_node_ids_prev(SamplingResponse* res) {
+  int32_t size = res->TotalNeighborCount();
+  npy_intp shape[1];
+  shape[0] = size;
+  PyArray_Descr* descr = PyArray_DescrFromType(NPY_INT64);
+  PyObject* obj = PyArray_Zeros(1, shape, descr, 0);
+  PyArrayObject* np_array = reinterpret_cast<PyArrayObject*>(obj);
+  memcpy(reinterpret_cast<int64_t*>(PyArray_DATA(np_array)),
+         res->GetNeighborIds_prev(), size * INT64_BYTES);
   return obj;
 }
 

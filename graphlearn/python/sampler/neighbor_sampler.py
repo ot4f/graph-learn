@@ -96,14 +96,16 @@ class NeighborSampler(object):
                        "of elements as num_at_each_hop")
 
     src_ids = ids
+    prev_ids = -np.ones_like(ids)
     current_batch_size = ids.size
     layers = Layers()
     for i in range(len(self._meta_path)):
-      req = self._make_req(i, src_ids)
+      req = self._make_req(i, src_ids, prev_ids)
       res = pywrap.new_sampling_response()
       status = self._client.sample_neighbor(req, res)
       if status.ok():
         nbr_ids = pywrap.get_sampling_node_ids(res)
+        nbr_ids_prev = pywrap.get_sampling_node_ids_prev(res)
         edge_ids = pywrap.get_sampling_edge_ids(res)
 
       pywrap.del_op_response(res)
@@ -129,9 +131,10 @@ class NeighborSampler(object):
       current_batch_size = nbr_ids_flat.size
 
       src_ids = nbr_ids
+      prev_ids = nbr_ids_prev
     return layers
 
-  def _make_req(self, index, src_ids):
+  def _make_req(self, index, src_ids, prev_ids=None):
     """ Make rpc request.
     """
     if len(self._meta_path) > len(self._expand_factor):
@@ -141,6 +144,8 @@ class NeighborSampler(object):
     req = pywrap.new_sampling_request(
         self._meta_path[index], sampler, self._expand_factor[index])
     pywrap.set_sampling_request(req, src_ids)
+    if prev_ids is not None:
+      pywrap.set_sampling_request_prev(req, prev_ids)
     return req
 
 

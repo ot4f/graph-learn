@@ -32,12 +32,14 @@ public:
   OpRequest* Clone() const override;
 
   void Set(const int64_t* src_ids, int32_t batch_size);
+  void SetPrev(const int64_t* prev_ids, int32_t batch_size);
 
   const std::string& Type() const;
   const std::string& Strategy() const;
   int32_t BatchSize() const;
   int32_t NeighborCount() const { return neighbor_count_; }
   const int64_t* GetSrcIds() const;
+  const int64_t* GetPrevIds() const;
 
 protected:
   void SetMembers() override;
@@ -45,6 +47,7 @@ protected:
 private:
   int32_t neighbor_count_;
   Tensor* src_ids_;
+  Tensor* prev_ids_;
 };
 
 class SamplingResponse : public OpResponse {
@@ -75,9 +78,11 @@ public:
   int32_t NeighborCount() const { return neighbor_count_; }
   int32_t TotalNeighborCount() const { return total_neighbor_count_; }
   int64_t* GetNeighborIds();
+  int64_t* GetNeighborIds_prev();
   int64_t* GetEdgeIds();
   int32_t* GetDegrees();
   const int64_t* GetNeighborIds() const;
+  const int64_t* GetNeighborIds_prev() const;
   const int64_t* GetEdgeIds() const;
   const int32_t* GetDegrees() const;
 
@@ -88,6 +93,7 @@ private:
   int32_t neighbor_count_;
   int32_t total_neighbor_count_;
   Tensor* neighbors_;
+  Tensor* neighbors_prev_;
   Tensor* edges_;
   Tensor* degrees_;
 };

@@ -69,6 +69,10 @@ void SamplingRequest::Set(const int64_t* src_ids,
   src_ids_->AddInt64(src_ids, src_ids + batch_size);
 }
 
+void SamplingRequest::SetPrev(const int64_t* prev_ids, int32_t batch_size){
+  prev_ids_->AddInt64(prev_ids, prev_ids+batch_size);
+}
+
 int32_t SamplingRequest::BatchSize() const {
   return src_ids_->Size();
 }
@@ -84,6 +88,14 @@ const std::string& SamplingRequest::Strategy() const {
 const int64_t* SamplingRequest::GetSrcIds() const {
   if (src_ids_) {
     return src_ids_->GetInt64();
+  } else {
+    return nullptr;
+  }
+}
+
+const int64_t* SamplingRequest::GetPrevIds() const {
+  if (prev_ids_) {
+    return prev_ids_->GetInt64();
   } else {
     return nullptr;
   }
@@ -175,6 +187,11 @@ void SamplingResponse::AppendNeighborId(int64_t id) {
   ++total_neighbor_count_;
 }
 
+void SamplingResponse::AppendNeighborIdPrev(int64_t id) {
+  neighbors_prev_->AddInt64(id);
+  // ++total_neighbor_count_;
+}
+
 void SamplingResponse::AppendEdgeId(int64_t id) {
   edges_->AddInt64(id);
 }
@@ -206,6 +223,14 @@ int64_t* SamplingResponse::GetNeighborIds() {
   }
 }
 
+int64_t* SamplingResponse::GetNeighborIds_prev() {
+  if (neighbors_prev_) {
+    return const_cast<int64_t*>(neighbors_prev_->GetInt64());
+  } else {
+    return nullptr;
+  }
+}
+
 int64_t* SamplingResponse::GetEdgeIds() {
   if (edges_) {
     return const_cast<int64_t*>(edges_->GetInt64());
@@ -225,6 +250,14 @@ int32_t* SamplingResponse::GetDegrees() {
 const int64_t* SamplingResponse::GetNeighborIds() const {
   if (neighbors_) {
     return neighbors_->GetInt64();
+  } else {
+    return nullptr;
+  }
+}
+
+const int64_t* SamplingResponse::GetNeighborIds_prev() const {
+  if (neighbors_prev_) {
+    return neighbors_prev_->GetInt64();
   } else {
     return nullptr;
   }
